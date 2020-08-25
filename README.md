@@ -13,11 +13,13 @@ In this demo, the prediction is made after every second. If the prediction is co
 
 The dataset used is downloaded from [Brain4cars](https://github.com/asheshjain399/ICCV2015_Brain4Cars).
 
-Videos are extracted into images with the fps=25 under each directory. 
+1. Videos are extracted into images with the fps=25 under each directory. The file name format is e.g. "image-0001.png".
 
-We split the dataset using 5-fold cross validaton. Run script ``n_fold_Brain4cars.py`` in directory ``datasets/annotation`` to split.
+   You can use our script ``extract_frames.py`` in ``datasets/annotation`` to extract images: Copy this file to directory of "face_camera", and then run this script.
 
-(Or you can use the five ``.csv`` files in ``datasets/annotation`` .)
+2. We split the dataset using 5-fold cross validaton. Run script ``n_fold_Brain4cars.py`` in directory ``datasets/annotation`` to split.
+
+   You can use the five ``.csv`` files in ``datasets/annotation`` and skip this step.
 
 
 ## Train 3D-ResNet50 with driver videos
@@ -51,7 +53,7 @@ Before running the run-3DResnet.sh script. Please give the path to:
 More details about other args, please refer to the ``opt.py``.
 
 
-The trained model using our script can be found: 
+The trained model using our script can be found in this [drive](https://bwstaff-my.sharepoint.com/:f:/g/personal/yao_rong_bwstaff_de/EpmuNb3eB7hPgv2DmeBrQ1ABqgQ6uInXudrpfQQyPgmJZA?e=RimExC). The model name is "save_best_3DResNet50.pth".
 
 
 
