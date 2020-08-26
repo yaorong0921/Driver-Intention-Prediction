@@ -191,3 +191,19 @@ class UniformEndSample(object):
             out_idx.append(frame_indices[idx])
 
         return out_idx
+
+class UniformIntervalCrop(object):
+    def __init__(self, size, interval):
+        self.size = size
+        self.interval = interval
+
+    def __call__(self, frame_indices):
+        last_input = frame_indices[-1]
+        target = last_input
+        out = [last_input-self.interval+1]
+
+        while (len(out)<self.size):
+            out.append(out[-1]-self.interval+1)
+        out.reverse()
+
+        return out, [target]

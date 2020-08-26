@@ -1,12 +1,12 @@
-CUDA_VISIBLE_DEVICES=0 python main.py \
+CUDA_VISIBLE_DEVICES=0 python main_inside.py \
                --root_path ~/Driver-Intention-Prediction \
-               --video_path /path_to_brain4cars_data/face_camera \
+               --video_path  /path_to_brain4cars_data/face_camera/ \
                --annotation_path ~/Driver-Intention-Prediction/datasets/annotation \
 			   --result_path results \
-			   --dataset Brain4cars \
+			   --dataset Brain4cars_Inside \
 			   --n_classes 400 \
 			   --n_finetune_classes 5 \
-			   --pretrain_path /path_to_model/resnet-50-kinetics.pth \
+			   --pretrain_path /path_to_models/resnet-50-kinetics.pth \
 			   --ft_begin_index 4 \
 			   --model resnet \
 			   --model_depth 50 \
@@ -23,3 +23,4 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
 			   --n_scales 3 \
 			   --learning_rate 0.1 \
 			   --n_fold 0 \
+

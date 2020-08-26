@@ -27,7 +27,7 @@ def parse_opts():
         '--dataset',
         default='kinetics',
         type=str,
-        help='Used dataset (Brain4cars)')
+        help='Used dataset (Brain4cars_Inside | Brain4cars_Outside')
     parser.add_argument(
         '--n_classes',
         default=400,
@@ -57,6 +57,11 @@ def parse_opts():
         default=5,
         type=int,
         help='The second before maneuvers. Maximal is 5 seconds, and minimal is 1 second (before maneuvers)')
+    parser.add_argument(
+        '--interval',
+        default=5,
+        type=int,
+        help='The interval in sampling outside images for training ConvLSTM. From 1 to 30.')
     parser.add_argument(
         '--initial_scale',
         default=1.0,

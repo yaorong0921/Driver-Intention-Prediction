@@ -18,9 +18,10 @@ from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set
 from utils import Logger
-from train import train_epoch
-from validation import val_epoch
 
+from torch.autograd import Variable
+import time
+from utils import AverageMeter, calculate_accuracy
 
 if __name__ == '__main__':
 
@@ -137,39 +138,150 @@ if __name__ == '__main__':
             optimizer.load_state_dict(checkpoint['optimizer'])
 
     print('run')
-    for i in range(opt.begin_epoch, opt.n_epochs + 1):
+    global best_prec
+    best_prec = 0
+    for epoch in range(opt.begin_epoch, opt.n_epochs + 1):
 
         if not opt.no_train:
-            train_epoch(i, train_loader, model, criterion, optimizer, opt,
-                        train_logger, train_batch_logger)
+            print('train at epoch {}'.format(epoch))
+
+            model.train()
+
+            batch_time = AverageMeter()
+            data_time = AverageMeter()
+            losses = AverageMeter()
+            accuracies = AverageMeter()
+
+            end_time = time.time()
+            for i, (inputs, targets) in enumerate(train_loader):
+                data_time.update(time.time() - end_time)
+
+                if not opt.no_cuda:
+                    targets = targets.cuda(non_blocking=True)
+                inputs = Variable(inputs)
+                targets = Variable(targets)
+                outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                acc = calculate_accuracy(outputs, targets)
+
+                losses.update(loss.item(), inputs.size(0))
+                accuracies.update(acc, inputs.size(0))
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                batch_time.update(time.time() - end_time)
+                end_time = time.time()
+
+                train_batch_logger.log({
+                    'epoch': epoch,
+                    'batch': i + 1,
+                    'iter': (epoch - 1) * len(train_loader) + (i + 1),
+                    'loss': losses.val,
+                    'acc': accuracies.val,
+                    'lr': optimizer.param_groups[0]['lr']
+                })
+                if i % 5 == 0:
+                  print('Epoch: [{0}][{1}/{2}]\t'
+                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                      'Acc {acc.val:.3f} ({acc.avg:.3f})'.format(
+                          epoch,
+                          i + 1,
+                          len(train_loader),
+                          batch_time=batch_time,
+                          data_time=data_time,
+                          loss=losses,
+                          acc=accuracies))
+
+            train_logger.log({
+                'epoch': epoch,
+                'loss': losses.avg,
+                'acc': accuracies.avg,
+                'lr': optimizer.param_groups[0]['lr']
+            })
+
+            if epoch % opt.checkpoint == 0:
+                save_file_path = os.path.join(opt.result_path,
+                                              'save_{}.pth'.format(epoch))
+                states = {
+                    'epoch': epoch + 1,
+                    'arch': opt.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                }
+
         if not opt.no_val:
-            validation_loss = val_epoch(i, val_loader, model, criterion, optimizer, opt,
-                                        val_logger)
+            print('Validation at epoch {}'.format(epoch))
+
+            model.eval()
+
+            batch_time = AverageMeter()
+            data_time = AverageMeter()
+            losses = AverageMeter()
+            accuracies = AverageMeter()
+
+            end_time = time.time()
+
+            conf_mat = torch.zeros(opt.n_finetune_classes, opt.n_finetune_classes)
+            output_file = []
+
+            for i, (inputs, targets) in enumerate(val_loader):
+                data_time.update(time.time() - end_time)
+
+                if not opt.no_cuda:
+                    targets = targets.cuda(non_blocking=True)
+                inputs = Variable(inputs, volatile=True)
+                targets = Variable(targets, volatile=True)
+                outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                acc = calculate_accuracy(outputs, targets)
+
+                ### print out the confusion matrix
+                _,pred = torch.max(outputs,1)
+                for t,p in zip(targets.view(-1), pred.view(-1)):
+                    conf_mat[t,p] += 1
+
+                losses.update(loss.item(), inputs.size(0))
+                accuracies.update(acc, inputs.size(0))
+
+                batch_time.update(time.time() - end_time)
+                end_time = time.time()
+
+                print('Epoch: [{0}][{1}/{2}]\t'
+                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                      'Acc {acc.val:.4f} ({acc.avg:.4f})'.format(
+                          epoch,
+                          i + 1,
+                          len(val_loader),
+                          batch_time=batch_time,
+                          data_time=data_time,
+                          loss=losses,
+                          acc=accuracies))
+            print(conf_mat)
+
+            val_logger.log({'epoch': epoch, 'loss': losses.avg, 'acc': accuracies.avg})
+
+            is_best = accuracies.avg > best_prec
+            best_prec = max(accuracies.avg, best_prec)
+            print('\n The best prec is %.4f' % best_prec)
+            if is_best:
+                states = {
+                    'epoch': epoch + 1,
+                    'arch': opt.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                 }
+                save_file_path = os.path.join(opt.result_path,
+                                    'save_best.pth')
+                torch.save(states, save_file_path)
 
         if not opt.no_train and not opt.no_val:
             scheduler.step()
 
 
-    # for i, (inputs, targets, video) in enumerate(val_loader):
-    #     if i%100 == 0:
-    #         print("Processing to image {}".format(i))
-    #     name = video[0]
-    #     model.eval()
 
-    #     file_path_base = name.find('face_camera',1)
-    #     file_path = name[:file_path_base]
-
-    #     s = name[file_path_base+12:]
-    #     idx = s.split('/')
-    #     file_path = os.path.join(file_path, 'features','face', idx[0])
-    #     file_name = idx[1] + '.pt'
-    #     save_path = os.path.join(file_path, file_name)
-
-    #     val_out = model(inputs).squeeze().cpu()
-    #     print(save_path)
-    #     torch.save(val_out, save_path)
-
-    # #      print(save_path)
-    # #      b.save(name1,"PNG")
-    # #      a.save(name1,'PNG')
-    # #    sys.exit()

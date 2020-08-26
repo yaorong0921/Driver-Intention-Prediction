@@ -116,7 +116,12 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video, e
             print('File does not exists: %s'%video_path)
             continue
 
-        n_frames = annotations[i]['n_frames']
+#        n_frames = annotations[i]['n_frames']
+        # count in the dir
+        l = os.listdir(video_path)
+        # If there are other files (e.g. original videos) besides the images in the folder, please abstract.
+        n_frames = len(l)-2
+
         if n_frames < 16 + 25*(end_second-1):
             print('Video is too short: %s'%video_path)
             continue
@@ -147,23 +152,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video, e
     return dataset, idx_to_class
 
 
-class Brain4cars(data.Dataset):
-    """
-    Args:
-        root (string): Root directory path.
-        spatial_transform (callable, optional): A function/transform that  takes in an PIL image
-            and returns a transformed version. E.g, ``transforms.RandomCrop``
-        temporal_transform (callable, optional): A function/transform that  takes in a list of frame indices
-            and returns a transformed version
-        target_transform (callable, optional): A function/transform that takes in the
-            target and transforms it.
-        loader (callable, optional): A function to load an video given its path and frame indices.
-     Attributes:
-        classes (list): List of the class names.
-        class_to_idx (dict): Dict with items (class_name, class_index).
-        imgs (list): List of (image path, class_index) tuples
-    """
-
+class Brain4cars_Inside(data.Dataset):
     def __init__(self,
                  root_path,
                  annotation_path,
@@ -227,6 +216,67 @@ class Brain4cars(data.Dataset):
                 target = 4
             elif target == 4:
                 target = 2
+
+        return clip, target
+    def __len__(self):
+        return len(self.data)
+
+class Brain4cars_Outside(data.Dataset):
+    def __init__(self,
+                 root_path,
+                 annotation_path,
+                 subset,
+                 nfold,
+                 end_second,
+                 n_samples_for_each_video=1,
+                 spatial_transform=None,
+                 horizontal_flip=None,
+                 temporal_transform=None,
+                 target_transform=None,
+                 sample_duration=5,
+                 get_loader=get_default_video_loader):
+        self.data, self.class_names = make_dataset(
+            root_path, annotation_path, subset, n_samples_for_each_video,
+            end_second, sample_duration, nfold)
+
+        self.spatial_transform = spatial_transform
+        self.temporal_transform = temporal_transform
+        self.target_transform = target_transform
+        self.horizontal_flip = horizontal_flip
+        self.loader = get_loader()
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target) where target is an image.
+        """
+        path = self.data[index]['video']
+
+        frame_indices = self.data[index]['frame_indices']
+        h_flip = False
+
+        if self.temporal_transform is not None:
+            frame_indices,target_idc = self.temporal_transform(frame_indices)
+        clip = self.loader(path, frame_indices)
+        target = self.loader(path, target_idc)
+
+        if self.horizontal_flip is not None:
+            p = random.random()
+            if p < 0.5:
+                clip = [self.horizontal_flip(img) for img in clip]
+                target = [self.horizontal_flip(img) for img in target]
+
+        if self.spatial_transform is not None:
+            self.spatial_transform.randomize_parameters()
+            clip = [self.spatial_transform(img) for img in clip]
+        clip = torch.stack(clip, 0)
+
+        if self.target_transform is not None:
+            target = [self.target_transform(img) for img in target]
+        target = torch.stack(target, 0).permute(1, 0, 2, 3).squeeze()
+            
 
         return clip, target
     def __len__(self):
