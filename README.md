@@ -22,7 +22,7 @@ The dataset used is downloaded from [Brain4cars](https://github.com/asheshjain39
    You can use the five ``.csv`` files in ``datasets/annotation`` and skip this step.
 
 
-## Train 3D-ResNet50 with inside videos
+## Train/Evaluate 3D-ResNet50 with inside videos
 
 
 The network, 3D-ResNet 50 and its pretrained model is downloaded from [3D ResNets](https://github.com/kenshohara/3D-ResNets-PyTorch). 
@@ -56,7 +56,7 @@ More details about other args, please refer to the ``opt.py``.
 The trained model using our script can be found in this [drive](https://bwstaff-my.sharepoint.com/:f:/g/personal/yao_rong_bwstaff_de/EpmuNb3eB7hPgv2DmeBrQ1ABqgQ6uInXudrpfQQyPgmJZA?e=RimExC). The model name is "save_best_3DResNet50.pth".
 
 
-## Train ConvLSTM with outside videos
+## Train/Evaluate ConvLSTM with outside videos
 
 We used [FlowNet 2.0](https://github.com/NVIDIA/flownet2-pytorch) to extract the optical flow of all outside images.
 
