@@ -93,10 +93,13 @@ Before running the run-ConvLSTM.sh script. Please give the path to:
 If you find this work useful, please cite as follows:
 
 ```
-@article{rong2020driver,
-  title={Driver Intention Anticipation Based on In-Cabin and Driving SceneMonitoring},  
-  author={Rong, Yao and Akata, Zeynep and Kasneci, Enkelejda}, 
-  journal={arXiv preprint arXiv:2006.11557},
-  year={2020}
-}
+@INPROCEEDINGS{9294181,
+  author={Rong, Yao and Akata, Zeynep and Kasneci, Enkelejda},
+  booktitle={2020 IEEE 23rd International Conference on Intelligent Transportation Systems (ITSC)}, 
+  title={Driver Intention Anticipation Based on In-Cabin and Driving Scene Monitoring}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={1-8},
+  doi={10.1109/ITSC45102.2020.9294181}}
 ```
