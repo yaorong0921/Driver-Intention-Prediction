@@ -88,8 +88,6 @@ Before running the run-ConvLSTM.sh script. Please give the path to:
 
 
 
-*The rest of code will be uploaded soon*
-
 If you find this work useful, please cite as follows:
 
 ```
