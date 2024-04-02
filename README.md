@@ -60,7 +60,7 @@ The trained model using our script can be found under this [link](https://tumde-
 
 We used [FlowNet 2.0](https://github.com/NVIDIA/flownet2-pytorch) to extract the optical flow of all outside images.
 
-You could also find these optical flow images under this [link](https://tumde-my.sharepoint.com/:f:/g/personal/yao_rong_tum_de/EroSnyFR9f9LvkRTrPUKkoUBpa2V6puPwRFLZ9LyNjixPw?e=PnQp1G.
+You could also find these optical flow images under this [link](https://tumde-my.sharepoint.com/:f:/g/personal/yao_rong_tum_de/EroSnyFR9f9LvkRTrPUKkoUBpa2V6puPwRFLZ9LyNjixPw?e=PnQp1G).
 
 We adapted our ConvLSTM network from this [repo](https://github.com/automan000/Convolutional_LSTM_PyTorch).
 
