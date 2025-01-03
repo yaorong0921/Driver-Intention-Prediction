@@ -53,14 +53,14 @@ Before running the run-3DResnet.sh script. Please give the path to:
 More details about other args, please refer to the ``opt.py``.
 
 
-The trained model using our script can be found under this [link](https://tumde-my.sharepoint.com/:f:/g/personal/yao_rong_tum_de/EroSnyFR9f9LvkRTrPUKkoUBpa2V6puPwRFLZ9LyNjixPw?e=PnQp1G). The model name is "save_best_3DResNet50.pth".
+The trained model using our script can be found under this [link](https://rice-my.sharepoint.com/:f:/g/personal/yr20_rice_edu/ErN1QpA4GdVJpnmHl6_0G5MBGYpPnKJyLNXjbmyhBwjkhQ?e=lGFQmJ). The model name is "save_best_3DResNet50.pth".
 
 
 ## Train/Evaluate ConvLSTM with outside videos
 
 We used [FlowNet 2.0](https://github.com/NVIDIA/flownet2-pytorch) to extract the optical flow of all outside images.
 
-You could also find these optical flow images under this [link](https://tumde-my.sharepoint.com/:f:/g/personal/yao_rong_tum_de/EroSnyFR9f9LvkRTrPUKkoUBpa2V6puPwRFLZ9LyNjixPw?e=PnQp1G).
+You could also find these optical flow images under this [link](https://rice-my.sharepoint.com/:f:/g/personal/yr20_rice_edu/ErN1QpA4GdVJpnmHl6_0G5MBGYpPnKJyLNXjbmyhBwjkhQ?e=lGFQmJ).
 
 We adapted our ConvLSTM network from this [repo](https://github.com/automan000/Convolutional_LSTM_PyTorch).
 
